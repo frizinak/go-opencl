@@ -25,10 +25,7 @@ type Kernel struct {
 type LocalBuffer int
 
 func releaseKernel(k *Kernel) {
-	if k.clKernel != nil {
-		C.clReleaseKernel(k.clKernel)
-		k.clKernel = nil
-	}
+	C.clReleaseKernel(k.clKernel)
 }
 
 func (k *Kernel) Release() {

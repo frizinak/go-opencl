@@ -99,7 +99,7 @@ func (q *CommandQueue) EnqueueWriteBuffer(buffer *MemObject, blocking bool, offs
 }
 
 func (q *CommandQueue) EnqueueWriteBufferFloat32(buffer *MemObject, blocking bool, offset int, data []float32, eventWaitList []*Event) (*Event, error) {
-	dataPtr := unsafe.Pointer(&data[0])
+	dataPtr := Ptr(data)
 	dataSize := int(unsafe.Sizeof(data[0])) * len(data)
 	return q.EnqueueWriteBuffer(buffer, blocking, offset, dataSize, dataPtr, eventWaitList)
 }
@@ -112,7 +112,7 @@ func (q *CommandQueue) EnqueueReadBuffer(buffer *MemObject, blocking bool, offse
 }
 
 func (q *CommandQueue) EnqueueReadBufferFloat32(buffer *MemObject, blocking bool, offset int, data []float32, eventWaitList []*Event) (*Event, error) {
-	dataPtr := unsafe.Pointer(&data[0])
+	dataPtr := Ptr(data)
 	dataSize := int(unsafe.Sizeof(data[0])) * len(data)
 	return q.EnqueueReadBuffer(buffer, blocking, offset, dataSize, dataPtr, eventWaitList)
 }
@@ -178,4 +178,13 @@ func (q *CommandQueue) EnqueueTask(kernel *Kernel, eventWaitList []*Event) (*Eve
 	var event C.cl_event
 	err := toError(C.clEnqueueTask(q.clQueue, kernel.clKernel, C.cl_uint(len(eventWaitList)), eventListPtr(eventWaitList), &event))
 	return newEvent(event), err
+}
+
+//Acquire OpenCL memory objects that have been created from OpenGL objects
+func (q *CommandQueue) EnqueueAcquireGLObjects(numobjs uint, gl_mem_objects []*MemObject, eventWaitList []*Event) (*Event, error) {
+	var event C.cl_event
+	cnum := C.uint(numobjs)
+	err := toError(C.clEnqueueAcquireGLObjects(q.clQueue, cnum, memListPtr(gl_mem_objects), C.cl_uint(len(eventWaitList)), eventListPtr(eventWaitList), &event))
+	return newEvent(event), err
+
 }
