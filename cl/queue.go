@@ -98,6 +98,13 @@ func (q *CommandQueue) EnqueueWriteBuffer(buffer *MemObject, blocking bool, offs
 	return newEvent(event), err
 }
 
+// EnqueueWriteBuffer enqueues commands to write to a buffer object from host memory.
+func (q *CommandQueue) EnqueueWriteIntBuffer(buffer *MemObject, blocking bool, offset int, data []int, eventWaitList []*Event) (*Event, error) {
+	dataPtr := Ptr(data)
+	dataSize := int(unsafe.Sizeof(data[0])) * len(data)
+	return q.EnqueueWriteBuffer(buffer, blocking, offset, dataSize, dataPtr, eventWaitList)
+}
+
 func (q *CommandQueue) EnqueueWriteBufferFloat32(buffer *MemObject, blocking bool, offset int, data []float32, eventWaitList []*Event) (*Event, error) {
 	dataPtr := Ptr(data)
 	dataSize := int(unsafe.Sizeof(data[0])) * len(data)
