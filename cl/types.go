@@ -430,6 +430,18 @@ func eventListPtr(el []*Event) *C.cl_event {
 	return (*C.cl_event)(&elist[0])
 }
 
+func memListPtr(el []*MemObject) *C.cl_mem {
+	if el == nil {
+		return nil
+	}
+
+	elist := make([]C.cl_mem, len(el))
+	for i, e := range el {
+		elist[i] = e.clMem
+	}
+	return (*C.cl_mem)(&elist[0])
+}
+
 func clBool(b bool) C.cl_bool {
 	if b {
 		return C.CL_TRUE

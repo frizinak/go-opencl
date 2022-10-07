@@ -2,7 +2,9 @@
 #if defined(__APPLE__)
 #   include <OpenCL/cl.h>
 #   include <OpenCL/cl_ext.h>
+#   include <OpenCL/cl_gl.h>
 #else
 #   include <CL/cl.h>
 #   include <CL/cl_ext.h>
+#   include <CL/cl_gl.h>
 #endif

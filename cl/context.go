@@ -56,7 +56,9 @@ func CreateContext(devices []*Device) (*Context, error) {
 	if clContext == nil {
 		return nil, ErrUnknown
 	}
-	context := &Context{clContext: clContext, devices: devices}
+	context := &Context{}
+	context.clContext = clContext
+	context.devices = devices
 	runtime.SetFinalizer(context, releaseContext)
 	return context, nil
 }
@@ -146,6 +148,67 @@ func (ctx *Context) CreateUserEvent() (*Event, error) {
 
 func (ctx *Context) Release() {
 	releaseContext(ctx)
+}
+
+func (ctx *Context) CreateFromGLBuffer(flags MemFlag, bufobj uint, size int) (*MemObject, error) {
+	var err C.cl_int
+	cbufobj := C.uint(bufobj)
+	glBuffer := C.clCreateFromGLBuffer(ctx.clContext, C.cl_mem_flags(flags), cbufobj, &err)
+	if err != C.CL_SUCCESS {
+		return nil, toError(err)
+	}
+	return newMemObject(glBuffer, size), nil
+}
+
+func (ctx *Context) CreateFromGLTexture(flags MemFlag, gl_texture_target uint, mip_level int, texture_id uint, size int) (*MemObject, error) {
+	var err C.cl_int
+	ctarg := C.uint(gl_texture_target)
+	cmip := C.int(mip_level)
+	ctex := C.uint(texture_id)
+
+	glTexture := C.clCreateFromGLTexture(ctx.clContext, C.cl_mem_flags(flags), ctarg, cmip, ctex, &err)
+	if err != C.CL_SUCCESS {
+		return nil, toError(err)
+	}
+	return newMemObject(glTexture, size), nil
+}
+
+func (ctx *Context) CreateFromGLRenderbuffer(flags MemFlag, gl_renderbuffer uint, size int) (*MemObject, error) {
+	var err C.cl_int
+	cbuf := C.uint(gl_renderbuffer)
+	glRenderbuffer := C.clCreateFromGLRenderbuffer(ctx.clContext, C.cl_mem_flags(flags), cbuf, &err)
+	if err != C.CL_SUCCESS {
+		return nil, toError(err)
+	}
+	return newMemObject(glRenderbuffer, size), nil
+}
+
+//clCreateFromGLTexture2D is deprecated in Mac OSX
+func (ctx *Context) CreateFromGLTexture2D(flags MemFlag, gl_texture_target uint, mip_level int, texture_id uint, size int) (*MemObject, error) {
+	var err C.cl_int
+	ctarg := C.uint(gl_texture_target)
+	cmip := C.int(mip_level)
+	ctex := C.uint(texture_id)
+
+	glTexture := C.clCreateFromGLTexture2D(ctx.clContext, C.cl_mem_flags(flags), ctarg, cmip, ctex, &err)
+	if err != C.CL_SUCCESS {
+		return nil, toError(err)
+	}
+	return newMemObject(glTexture, size), nil
+}
+
+//clCreateFromGLTexure2D is deprecated in Mac OSX
+func (ctx *Context) CreateFromGLTexture3D(flags MemFlag, gl_texture_target uint, mip_level int, texture_id uint, size int) (*MemObject, error) {
+	var err C.cl_int
+	ctarg := C.uint(gl_texture_target)
+	cmip := C.int(mip_level)
+	ctex := C.uint(texture_id)
+
+	glTexture := C.clCreateFromGLTexture3D(ctx.clContext, C.cl_mem_flags(flags), ctarg, cmip, ctex, &err)
+	if err != C.CL_SUCCESS {
+		return nil, toError(err)
+	}
+	return newMemObject(glTexture, size), nil
 }
 
 // http://www.khronos.org/registry/cl/sdk/1.2/docs/man/xhtml/clCreateSubBuffer.html
