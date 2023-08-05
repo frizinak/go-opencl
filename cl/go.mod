@@ -1,3 +1,3 @@
-module github.com/andewx/go-opencl/cl
+module github.com/frizinak/go-opencl/cl
 
 go 1.18
